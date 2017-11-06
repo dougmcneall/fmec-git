@@ -3,8 +3,6 @@
 # 6th-8th November 2017
 
 
-Doug testing
-
 # Example of adding  density plots to a pairs plot
 dfunc.up <- function(x,y,...){
   require(MASS)
