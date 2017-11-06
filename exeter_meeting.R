@@ -3,6 +3,7 @@
 # 6th-8th November 2017
 
 
+Doug testing
 
 # Example of adding  density plots to a pairs plot
 dfunc.up <- function(x,y,...){
@@ -17,7 +18,7 @@ dfunc.up <- function(x,y,...){
 }
 
 rb = brewer.pal(9, "RdBu")
-br  = rev(rb)
+br = rev(rb)
 
 pdf(file = 'pairs_dens.pdf', width = 8, height = 8)
 par(oma = c(0,0,0,3))
