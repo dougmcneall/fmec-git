@@ -14,6 +14,7 @@ source("https://raw.githubusercontent.com/dougmcneall/packages-git/master/emtool
 source("https://raw.githubusercontent.com/dougmcneall/packages-git/master/imptools.R")
 source("https://raw.githubusercontent.com/dougmcneall/packages-git/master/vistools.R")
 
+source("fmecR.R")
 # -------------------------------------------------------------------
 # 1. Data loading
 # -------------------------------------------------------------------
@@ -56,17 +57,6 @@ pred.unif = predict(fit4, newdata = X.unif, type = 'UK')
 X.kept = X.unif[pred.unif$mean < 0.5, ]
 
 
-# Example of adding  density plots to a pairs plot
-dfunc.up <- function(x,y,...){
-  require(MASS)
-  require(RColorBrewer)
-  
-  rb = brewer.pal(9, "RdBu")
-  br  = rev(rb)
-  # function for plotting 2d kernel density estimates in pairs() plot.
-  kde = kde2d(x,y)
-  image(kde, col = rb, add = TRUE)
-}
 
 rb = brewer.pal(9, "RdBu")
 br = rev(rb)
