@@ -165,7 +165,32 @@ dev.off()
 
 
 
+# -----------------------------------------------------------------------------
+# Build an emulator in a two-step process - using both a stepwise linear
+# model, and an initial "flat prior" Gaussian process, to initialise the
+# hyperparameters and linear coefficients of a GP with a linear prior.
+# -----------------------------------------------------------------------------
 
+# transform the output for accuracy and convenience 
+y_sqrt = c(sqrt(y), recursive = TRUE)
+
+tsfit = twoStep(X.norm, y_sqrt, nugget=NULL, nuggetEstim=FALSE, noiseVar=NULL, seed=NULL, trace=FALSE, maxit=100,
+                   REPORT=10, factr=1e7, pgtol=0.0, parinit=NULL, popsize=100)
+
+# Initial leave-one-out prediction test of the two emulators
+tsloo = leaveOneOut.km(tsfit$emulator, trend.reestim = TRUE, type = 'UK')
+fit4loo = leaveOneOut.km(fit4, trend.reestim = TRUE, type = 'UK')
+
+loo.rmse(fit4loo, y_sqrt)
+loo.rmse(tsloo, y_sqrt)
+
+plot(y_sqrt, tsloo$mean)
+points(y_sqrt, fit4loo$mean, col = 'red')
+abline(0,1)
+
+plot(c(y, recursive = TRUE), fit4loo$mean^2)
+points(c(y, recursive = TRUE), tsloo$mean^2, col = 'red')
+abline(0,1)
 
 
 
