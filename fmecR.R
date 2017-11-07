@@ -120,6 +120,7 @@ twoStep = function(X, y, nugget=NULL, nuggetEstim=FALSE, noiseVar=NULL, seed=NUL
   print("Step has found formula:")
   print(start.form)
   if (!is.null(seed)) {set.seed(seed)}
+  # Is this right? Should this be form?
   m = km(start.form, design=X, response=y, nugget=nugget, parinit=coefs0,
          nugget.estim=nuggetEstim, noise.var=noiseVar, control=control_list)
   
