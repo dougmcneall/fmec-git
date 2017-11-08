@@ -40,19 +40,54 @@ X.norm = normalize(Xnl)
 ndims = ncol(X.norm)
 nens = nrow(X.norm)
 
-# Fit emulator
+# -------------------------------------------------------------------
+# 2. Fit Emulator
+# -------------------------------------------------------------------
+
+# linear with Cubic transform
+fit5 = km(formula=~., design=X.norm, response=(c(y, recursive = TRUE))^3,
+          control = list(maxit=1e4))
+loo5 = leaveOneOut.km(fit5, trend.reestim = TRUE, type = 'UK')
+
+# plot in cube space
+pdf(file = 'NL_fit_linear_cubeTRANS.pdf', width = 3, height = 6)
+plot(fit5)
+dev.off()
+# plot in original space
+pdf(file = 'NL_fit_linear_cubeTRANS_original.pdf', width = 6, height = 6)
+plot(c(y, recursive = TRUE), loo5$mean^(1/3), main = 'original scale', xlim = c(0,0.3))
+abline(0,1)
+dev.off()
+
+
 # linear with sqrt transform
 fit4 = km(formula=~., design=X.norm, response=sqrt(c(y, recursive = TRUE)),
           control = list(maxit=1e4))
+loo4 = leaveOneOut.km(fit4, trend.reestim = TRUE, type = 'UK')
+
+#sqrt space
+pdf(file = 'NL_fit_linear_sqrtTRANS.pdf', width = 3, height = 6)
+plot(fit4)
+dev.off()
+#original space
+pdf(file = 'NL_fit_linear_sqrtTRANS_original.pdf', width = 6, height = 6)
+plot(c(y, recursive = TRUE), loo4$mean^2, main = 'original scale', xlim = c(0,0.3))
+abline(0,1)
+dev.off()
+
+
+# -------------------------------------------------------------------
+# 3. Choose fit
+# -------------------------------------------------------------------
+fit = fit5
 
 # Plot a pairs plot with density
 X.unif = samp.unif(10000, mins = rep(0, ncol(X.norm)), maxes = rep(1, ncol(X.norm)))
 colnames(X.unif) <- colnames(X.norm)
 
-pred.unif = predict(fit4, newdata = X.unif, type = 'UK')
+pred.unif = predict(fit, newdata = X.unif, type = 'UK')
 
 X.kept = X.unif[pred.unif$mean < 0.5, ]
-
 
 
 rb = brewer.pal(9, "RdBu")
@@ -198,50 +233,6 @@ abline(0,1)
 legend('topleft', legend = c('GP', 'twoStep'), col = c(gp.col, ts.col), pch = 21)
 dev.off()
 
-
-# Where do we go in the parameter space (including to the edges)
-# in order to make needleleaf fraction as large as possible.
-# [the 'Optimisation code']
-
-# attach output to inputs and make a data.frame
-X.y_sqrt = data.frame(cbind(X.norm,y_sqrt))
-initfit = lm(y_sqrt ~ ., data = X.y_sqrt)
-stepfit = step(initfit, direction="both", k=log(length(y_sqrt)), trace=TRUE)
-
-# This is the cost function, gets fed to optim
-fn.step = function(newdata, cn){
-  newdata.df  = data.frame(matrix(newdata, nrow = 1))
-  colnames(newdata.df) = cn
-  out = predict(stepfit, newdata = newdata.df)
-  out
-}
-
-# initial values for optim in the middle of the design
-startin.mat <- matrix(rep(0.5, ncol(X.norm)), nrow = 1)
-startin <- data.frame(startin.mat)
-colnames(startin) <- colnames(X.norm)
-
-# Find the values which minimise needleleaf absolute error
-test <- optim(par = startin,
-              fn = fn.step,
-              method = "L-BFGS-B",
-              lower = rep(0,ncol(X.norm)),
-              upper = rep(1,ncol(X.norm)),
-              control = list(maxit = 2000),
-              cn = colnames(X.norm)
-)
-
-test$par[test$par!=0.5]
-
-plot(test$par)
-
-nd = data.frame(matrix(test$par, nrow = 1))
-colnames(nd) = colnames(X.norm)
-best_y_sqrt = predict(stepfit, newdata = nd)
-best_y = best_y_sqrt^2
-
-hist(c(y, recursive = TRUE), xlim = c(0,0.4))
-rug(best_y, col = 'red', lwd = 3)
 
 
 
