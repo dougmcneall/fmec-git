@@ -44,9 +44,6 @@ nens = nrow(X.norm)
 # linear with sqrt transform
 fit4 = km(formula=~., design=X.norm, response=sqrt(c(y, recursive = TRUE)),
           control = list(maxit=1e4))
-pred4 = predict(fit4, newdata = X.oat, type = 'UK')
-loo4 = leaveOneOut.km(fit4, type = 'UK')
-
 
 # Plot a pairs plot with density
 X.unif = samp.unif(10000, mins = rep(0, ncol(X.norm)), maxes = rep(1, ncol(X.norm)))
@@ -184,13 +181,23 @@ fit4loo = leaveOneOut.km(fit4, trend.reestim = TRUE, type = 'UK')
 loo.rmse(fit4loo, y_sqrt)
 loo.rmse(tsloo, y_sqrt)
 
-plot(y_sqrt, tsloo$mean)
-points(y_sqrt, fit4loo$mean, col = 'red')
-abline(0,1)
+gp.col = 'skyblue2'
+ts.col = 'tomato2'
 
-plot(c(y, recursive = TRUE), fit4loo$mean^2)
-points(c(y, recursive = TRUE), tsloo$mean^2, col = 'red')
+pdf(file = 'fits.pdf', width = 8, height = 5)
+par(mfrow = c(1,2))
+plot(y_sqrt, tsloo$mean, main = 'sqrt transform', col = ts.col)
+points(y_sqrt, fit4loo$mean, col = gp.col)
 abline(0,1)
+legend('topleft', legend = c('GP', 'twoStep'), col = c(gp.col, ts.col), pch = 21)
+
+
+plot(c(y, recursive = TRUE), tsloo$mean^2, col = ts.col, main = 'original scale')
+points(c(y, recursive = TRUE), fit4loo$mean^2, col = gp.col)
+abline(0,1)
+legend('topleft', legend = c('GP', 'twoStep'), col = c(gp.col, ts.col), pch = 21)
+dev.off()
+
 
 
 
