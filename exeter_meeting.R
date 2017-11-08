@@ -257,7 +257,7 @@ startin <- data.frame(startin.mat)
 colnames(startin) <- colnames(X.norm)
 
 # Find the values which minimise needleleaf absolute error
-test <- optim(par = startin,
+best.X <- optim(par = startin,
               fn = fn.step,
               method = "L-BFGS-B",
               lower = rep(0,ncol(X.norm)),
@@ -266,17 +266,25 @@ test <- optim(par = startin,
               cn = colnames(X.norm)
 )
 
-test$par[test$par!=0.5]
+best.X$par[best.X$par!=0.5]
 
-plot(test$par)
+pdf(file = 'bestX.pdf', width = 7, height = 6)
+par(mfrow = c(2,1))
+plot(best.X$par, axes = FALSE, xlab = '', ylab = 'normalised best value')
+axis(1, at = 1:length(best.X$par), labels = names(best.X$par), las = 2)
+axis(2)
 
-nd = data.frame(matrix(test$par, nrow = 1))
+nd = data.frame(matrix(best.X$par, nrow = 1))
 colnames(nd) = colnames(X.norm)
 best_y_sqrt = predict(stepfit, newdata = nd)
 best_y = best_y_sqrt^2
 
-hist(c(y, recursive = TRUE), xlim = c(0,0.4))
+hist(c(y, recursive = TRUE), xlim = c(0,0.4), xlab = 'Needleleaf fraction abs. error',
+     main = '')
 rug(best_y, col = 'red', lwd = 3)
+legend('topleft', legend = 'emulated best value', pch = '|', col = 'red', bty = 'n')
+
+dev.off()
 
 
 
