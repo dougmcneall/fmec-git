@@ -287,4 +287,50 @@ legend('topleft', legend = 'emulated best value', pch = '|', col = 'red', bty = 
 dev.off()
 
 
+# Quilt plots that visualise how emulated absolute model error changes
+# across parameter space.
+
+X.unif = samp.unif(100000, mins = rep(0, ncol(X.norm)), maxes = rep(1, ncol(X.norm)) )
+pred.unif = predict(fit4, newdata = X.unif, type = 'UK')
+pred.unif.y = pred.unif$mean^2
+
+pdf(file = 'quilts.pdf', width = 8, height = 8)
+par(mfrow = c(2,2), oma = c(1,1,1,1))
+
+quilt.plot(x = X.unif[ ,1],
+           y = X.unif[, 2],
+           z = pred.unif.y,
+           xlab = colnames(X.norm)[1],
+           ylab = colnames(X.norm)[2],
+           col = byr
+)
+
+quilt.plot(x = X.unif[ ,6],
+           y = X.unif[, 7],
+           z = pred.unif.y,
+           xlab = colnames(X.norm)[6],
+           ylab = colnames(X.norm)[7],
+           col = byr
+)
+
+quilt.plot(x = X.unif[ ,9],
+           y = X.unif[, 10],
+           z = pred.unif.y,
+           xlab = colnames(X.norm)[9],
+           ylab = colnames(X.norm)[10],
+           col = byr
+)
+
+quilt.plot(x = X.unif[ ,14],
+           y = X.unif[, 17],
+           z = pred.unif.y,
+           xlab = colnames(X.norm)[14],
+           ylab = colnames(X.norm)[17],
+           col = byr
+)
+
+dev.off()
+
+
+
 
