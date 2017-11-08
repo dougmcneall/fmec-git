@@ -234,5 +234,49 @@ legend('topleft', legend = c('GP', 'twoStep'), col = c(gp.col, ts.col), pch = 21
 dev.off()
 
 
+# Where do we go in the parameter space (including to the edges)
+# in order to make needleleaf fraction as large as possible.
+# [the 'Optimisation code']
+
+# attach output to inputs and make a data.frame
+X.y_sqrt = data.frame(cbind(X.norm,y_sqrt))
+initfit = lm(y_sqrt ~ ., data = X.y_sqrt)
+stepfit = step(initfit, direction="both", k=log(length(y_sqrt)), trace=TRUE)
+
+# This is the cost function, gets fed to optim
+fn.step = function(newdata, cn){
+  newdata.df  = data.frame(matrix(newdata, nrow = 1))
+  colnames(newdata.df) = cn
+  out = predict(stepfit, newdata = newdata.df)
+  out
+}
+
+# initial values for optim in the middle of the design
+startin.mat <- matrix(rep(0.5, ncol(X.norm)), nrow = 1)
+startin <- data.frame(startin.mat)
+colnames(startin) <- colnames(X.norm)
+
+# Find the values which minimise needleleaf absolute error
+test <- optim(par = startin,
+              fn = fn.step,
+              method = "L-BFGS-B",
+              lower = rep(0,ncol(X.norm)),
+              upper = rep(1,ncol(X.norm)),
+              control = list(maxit = 2000),
+              cn = colnames(X.norm)
+)
+
+test$par[test$par!=0.5]
+
+plot(test$par)
+
+nd = data.frame(matrix(test$par, nrow = 1))
+colnames(nd) = colnames(X.norm)
+best_y_sqrt = predict(stepfit, newdata = nd)
+best_y = best_y_sqrt^2
+
+hist(c(y, recursive = TRUE), xlim = c(0,0.4))
+rug(best_y, col = 'red', lwd = 3)
+
 
 
